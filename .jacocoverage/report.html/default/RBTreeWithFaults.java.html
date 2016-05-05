@@ -1,0 +1,757 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>RBTreeWithFaults.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;RBTreesWithFaults&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">default</a> &gt; <span class="el_source">RBTreeWithFaults.java</span></div><h1>RBTreeWithFaults.java</h1><pre class="source lang-java linenums">import java.util.LinkedList;
+import java.util.Queue;
+
+/**
+ *
+ * RBTree
+ *
+ * An implementation of a Red Black Tree with
+ * non-negative, distinct integer keys and values
+ *
+ */
+
+public class RBTreeWithFaults {
+	public RBNode Root;
+
+	/**
+	 * O(1)
+	 * @return the tree real root (not the sentinel)
+	 */
+	public RBNode getRoot(){
+<span class="nc" id="L21">		return Root.Left;</span>
+	}
+
+	/**
+	 * O(1)
+	 * Create a new empty tree
+	 */
+<span class="nc" id="L28">	public RBTreeWithFaults(){</span>
+<span class="nc" id="L29">		this.Root = createInfinityNode();</span>
+<span class="nc" id="L30">	}</span>
+
+	/**
+	 * O(1)
+	 * create a tree with a root
+	 * @param root - RBNode object will be the root of the tree
+	 */
+<span class="nc" id="L37">	public RBTreeWithFaults(RBNode root){</span>
+<span class="nc" id="L38">		this.Root = createInfinityNode(root);;</span>
+<span class="nc" id="L39">	}</span>
+
+	/**
+	 * O(1)
+	 * create infinity node with Null children
+	 * @return infinity node with no children
+	 */
+	public RBNode createInfinityNode(){
+<span class="nc" id="L47">		return createInfinityNode(createNullNode(null));</span>
+	}
+
+	/**
+	 * O(1)
+	 * create infinity node with a left child (infinity node cant have right child)
+	 * @param leftchild - the left child of the infinity node
+	 * @return infinity node with a left child
+	 */
+	public RBNode createInfinityNode(RBNode leftchild){
+		//create infinity node with a key of the maximum integer available in java.
+<span class="nc" id="L58">		RBNode node = new RBNode(&quot;Infinity&quot;,Integer.MAX_VALUE,leftchild,null,null);</span>
+		//set the parent of the new child to be the node
+<span class="nc" id="L60">		node.Left.Parent = node;</span>
+		//set the infinity node to be black
+<span class="nc" id="L62">		node.Black = true;</span>
+<span class="nc" id="L63">		return node;</span>
+	}
+
+	/**
+	 * O(1)
+	 * create a null node
+	 * @param parent - the parent of this null node
+	 * @return the null node already connected to its parent
+	 */
+	public RBNode createNullNode(RBNode parent){
+		//create a null node. this node will have the minimum integer value available in java as a key
+<span class="nc" id="L74">		RBNode newNode = new RBNode(&quot;N&quot;,Integer.MIN_VALUE,null,null,parent);</span>
+		//set the null node to be black (default is red)
+<span class="nc" id="L76">		newNode.Black = true;</span>
+<span class="nc" id="L77">		return newNode;</span>
+	}
+
+	/**
+	 * O(1)
+	 * public boolean empty()
+	 *
+	 * returns true if and only if the tree is empty
+	 *
+	 */
+	public boolean empty() {
+<span class="nc" id="L88">		return isNullNode(this.Root.Left);</span>
+	}
+
+	/**
+	 * O(log(n))
+	 * public String search(int k)
+	 *
+	 * returns the value of an item with key k if it exists in the tree
+	 * otherwise, returns null
+	 */
+	public String search(int k)
+	{
+<span class="nc" id="L100">		RBNode currNode = SearchNode(k,this.Root);</span>
+		//return null if the tree is empty
+<span class="nc bnc" id="L102" title="All 2 branches missed.">		if(currNode == null){</span>
+<span class="nc" id="L103">			return null;</span>
+		}
+
+		//if not found return null
+<span class="nc bnc" id="L107" title="All 4 branches missed.">		if(isNullNode(currNode) || currNode.Key != k){</span>
+<span class="nc" id="L108">			return null;</span>
+		}
+
+		//return the value of the node with the key = k
+<span class="nc" id="L112">		return currNode.Value;</span>
+	}
+
+	/**
+	 * O(log(n))
+	 * search for node
+	 * @param k - the key to look for
+	 * @param node - the node to start looking from
+	 * @return if found return the node with the same key and if not found returns the nearest node for the location
+	 * the node was supposed to be found. if the parent is the infinity node and not part of the tree
+	 * returns null
+	 */
+	public RBNode SearchNode(int k,RBNode node){
+		//if the node that was given is the sentinel recursively call the function with the tree root
+<span class="nc bnc" id="L126" title="All 2 branches missed.">		if (isInfinityNode(node)){</span>
+<span class="nc" id="L127">			return SearchNode(k,node.Left);</span>
+		}
+
+<span class="nc bnc" id="L130" title="All 2 branches missed.">		if(isNullNode(node)){</span>
+			//the node is not exist in the tree. we will return null if the tree is empty.
+<span class="nc bnc" id="L132" title="All 2 branches missed.">			if(isInfinityNode(node.Parent)){</span>
+<span class="nc" id="L133">				return null;</span>
+			}else{
+				//we could not find the node so we will return the parent of the imaginary node if it was exist in the tree 
+<span class="nc" id="L136">				return node.Parent;</span>
+			}
+		}
+
+<span class="nc bnc" id="L140" title="All 2 branches missed.">		if(node.Key &gt; k){</span>
+			//if the current node key is bigger then the key we look for
+			//recursively call searchNode with the left child of the current node 
+<span class="nc" id="L143">			return SearchNode(k,node.Left);</span>
+		}
+
+<span class="nc bnc" id="L146" title="All 2 branches missed.">		if(node.Key &lt; k){</span>
+			//if the current node key is lower then the key we look for
+			//recursively call searchNode with the right child of the current node
+<span class="nc" id="L149">			return SearchNode(k,node.Right);</span>
+		}
+
+		//if the current node key is not bigger and not lower it equals to the key we are looking for
+<span class="nc" id="L153">		return node;</span>
+	}
+
+	/**
+	 * O(log(n))
+	 * public int insert(int k, String v)
+	 *
+	 * inserts an item with key k and value v to the red black tree.
+	 * the tree must remain valid (keep its invariants).
+	 * returns the number of color switches, or 0 if no color switches were necessary.
+	 * returns -1 if an item with key k already exists in the tree.
+	 */
+	public int insert(int k, String v) { 
+		//find the place we want to insert the new node
+<span class="nc" id="L167">		RBNode y = SearchNode(k,this.Root);</span>
+		//create new node which y is its parent
+<span class="nc" id="L169">		RBNode z = new RBNode(v,k,y);</span>
+		//counter counts the number of color changes
+<span class="nc" id="L171">		int counter = 0;</span>
+<span class="nc bnc" id="L172" title="All 2 branches missed.">		if(y == null){</span>
+			//empty tree
+<span class="nc" id="L174">			this.Root.Left = z;</span>
+<span class="nc" id="L175">			z.Black = true;</span>
+<span class="nc" id="L176">			z.Parent = this.Root;</span>
+		}else{
+<span class="nc bnc" id="L178" title="All 2 branches missed.">			if(y.Key == z.Key){</span>
+				//an item with the key k is  already exist in the tree
+<span class="nc" id="L180">				return -1;</span>
+			}
+
+<span class="nc bnc" id="L183" title="All 2 branches missed.">			if(z.Key &lt; y.Key){</span>
+				//z will be a left child
+<span class="nc" id="L185">				y.Left = z;</span>
+			}else{
+				//z will be a right child
+<span class="nc" id="L188">				y.Right = z;</span>
+			}
+
+			//calling the method that will check if the tree is valid and if not fix it
+<span class="nc" id="L192">			counter = fixUpTree(z);</span>
+		}
+
+<span class="nc" id="L195">		return counter;	</span>
+	}
+
+	/**
+	 * O(log(n))
+	 * keep the red and black rules. this method will be called when the rules were been 
+	 * compromised and needs to be fix.
+	 * @param z - the node to start the fix from
+	 * @return the number of color changes that occurred while fixing the tree
+	 */
+	public int fixUpTree (RBNode z){
+		//counter will count the number of color changes
+<span class="nc" id="L207">		int counter = 0;</span>
+		//run until there is no problem with the red rule
+<span class="nc bnc" id="L209" title="All 2 branches missed.">		while(!z.Parent.Black){</span>
+<span class="nc bnc" id="L210" title="All 2 branches missed.">			if(z.Parent == z.Parent.Parent.Left){</span>
+				//z parent is a left child
+<span class="nc" id="L212">				RBNode y = z.Parent.Parent.Right;</span>
+<span class="nc bnc" id="L213" title="All 2 branches missed.">				if(!y.Black){</span>
+					//case 1: z'w parent and uncle are red
+<span class="nc" id="L215">					z.Parent.Black = true;</span>
+<span class="nc" id="L216">					y.Black = true;</span>
+<span class="nc" id="L217">					z.Parent.Parent.Black = false;</span>
+<span class="nc" id="L218">					z = z.Parent.Parent;</span>
+
+					//case 1 cost 3 color changes
+<span class="nc" id="L221">					counter += 3;</span>
+				}else{
+<span class="nc bnc" id="L223" title="All 2 branches missed.">					if(z == z.Parent.Right){</span>
+						//case 2: z is a right child and its uncle is red. need to left rotate
+<span class="nc" id="L225">						z = z.Parent;</span>
+<span class="nc" id="L226">						leftRotate(z);</span>
+					}
+					//case 3: z is a left child and its uncle is red. need to right rotate
+<span class="nc" id="L229">					z.Parent.Black = true; </span>
+<span class="nc" id="L230">					z.Parent.Parent.Black = false;</span>
+<span class="nc" id="L231">					rightRotate(z.Parent.Parent);</span>
+<span class="nc" id="L232">					counter += 2; </span>
+				}
+<span class="nc" id="L234">			}else{</span>
+				//z parent is a right child
+<span class="nc" id="L236">				RBNode y = z.Parent.Parent.Left;</span>
+<span class="nc bnc" id="L237" title="All 2 branches missed.">				if(!y.Black){</span>
+					//case 1: z'w parent and uncle are red
+<span class="nc" id="L239">					z.Parent.Black = true;</span>
+<span class="nc" id="L240">					y.Black = true;</span>
+<span class="nc" id="L241">					z.Parent.Parent.Black = false;</span>
+<span class="nc" id="L242">					z = z.Parent.Parent;</span>
+
+					//case 1 cost 3 color changes
+<span class="nc" id="L245">					counter += 3;</span>
+				}else{
+<span class="nc bnc" id="L247" title="All 2 branches missed.">					if(z == z.Parent.Left){</span>
+						//case 2: z is a left child and its uncle is red. need to right rotate
+<span class="nc" id="L249">						z = z.Parent;</span>
+<span class="nc" id="L250">						rightRotate(z);</span>
+					}
+					//case 3: z is a right child and its uncle is red. need to left rotate
+<span class="nc" id="L253">					z.Parent.Parent.Black = false;</span>
+<span class="nc" id="L254">					leftRotate(z.Parent.Parent);</span>
+
+<span class="nc" id="L256">					counter++;</span>
+				}
+<span class="nc" id="L258">			}</span>
+		}
+
+<span class="nc bnc" id="L261" title="All 2 branches missed.">		if(!this.Root.Left.Black){</span>
+<span class="nc" id="L262">			counter++;</span>
+<span class="nc" id="L263">			this.Root.Left.Black = true;</span>
+		}
+
+<span class="nc" id="L266">		return counter;</span>
+	}
+
+	/**
+	 * O(1)
+	 * put y as left child for x
+	 * @param x - the parent node
+	 * @param y - left child root
+	 */
+	public void leftChild(RBNode x,RBNode y){
+<span class="nc" id="L276">		x.Left = y;</span>
+<span class="nc" id="L277">		y.Parent = x;</span>
+<span class="nc" id="L278">	}</span>
+
+	/**
+	 * O(1)
+	 * put y as right child of x
+	 * @param x - the parent node
+	 * @param y - the right child node
+	 */
+	public void rightChild(RBNode x,RBNode y){
+<span class="nc" id="L287">		x.Right = y;</span>
+<span class="nc" id="L288">		y.Parent = x;</span>
+<span class="nc" id="L289">	}</span>
+
+	/**
+	 * O(1)
+	 * put y instead of x
+	 * @param x - the original child
+	 * @param y - the child after the change
+	 */
+	public void transplate(RBNode x, RBNode y){
+<span class="nc bnc" id="L298" title="All 2 branches missed.">		if (x == x.Parent.Left){</span>
+<span class="nc" id="L299">			leftChild(x.Parent,y);</span>
+		}else{
+<span class="nc" id="L301">			rightChild(x.Parent,y);</span>
+		}
+<span class="nc" id="L303">	}</span>
+
+	/**
+	 * O(1)
+	 * rotate the tree left (according to the principles discussed in class and can be
+	 * found in Book: Cormen - introduction to algorithms
+	 * @param x - the node to rotate from
+	 */
+	public void leftRotate(RBNode x){
+<span class="nc" id="L312">		RBNode y = x.Right;</span>
+<span class="nc" id="L313">		transplate(x,y);</span>
+<span class="nc" id="L314">		rightChild(x,y.Left);</span>
+<span class="nc" id="L315">		leftChild(y,x);</span>
+<span class="nc" id="L316">	}</span>
+
+	/**
+	 * O(1)
+	 * rotate the tree right (according to the principles discussed in class and can be
+	 * found in Book: Cormen - introduction to algorithms
+	 * @param x - the node to rotate from
+	 */
+	public void rightRotate(RBNode y){
+<span class="nc" id="L325">		RBNode x = y.Left;</span>
+<span class="nc" id="L326">		transplate(y,x);</span>
+<span class="nc" id="L327">		leftChild(y,x.Right);</span>
+<span class="nc" id="L328">		rightChild(x,y);</span>
+<span class="nc" id="L329">	}</span>
+
+	/**
+	 * O(log(n))
+	 * public int delete(int k)
+	 *
+	 * deletes an item with key k from the binary tree, if it is there;
+	 * the tree must remain valid (keep its invariants).
+	 * returns the number of color switches, or 0 if no color switches were needed.
+	 * returns -1 if an item with key k was not found in the tree.
+	 */
+	public int delete(int k)
+	{	
+<span class="nc" id="L342">		int counter = 0;</span>
+<span class="nc" id="L343">		RBNode z = SearchNode(k, this.Root);</span>
+<span class="nc bnc" id="L344" title="All 2 branches missed.">		if(z.Key != k){</span>
+			//item with the key k could not be found
+<span class="nc" id="L346">			return -1;</span>
+		}
+
+		RBNode x;
+<span class="nc" id="L350">		RBNode y = z;</span>
+<span class="nc" id="L351">		boolean isBlackOriginalY = y.Black;</span>
+
+		//z is the node we want to delete
+<span class="nc bnc" id="L354" title="All 2 branches missed.">		if(isNullNode(z.Left)){</span>
+<span class="nc" id="L355">			x = z.Right;</span>
+<span class="nc" id="L356">			transplate(z,z.Right);</span>
+<span class="nc bnc" id="L357" title="All 2 branches missed.">		}else if(isNullNode(z.Right)){</span>
+<span class="nc" id="L358">			x = z.Left;</span>
+<span class="nc" id="L359">			transplate(z,z.Left);</span>
+		}else{
+<span class="nc" id="L361">			y = minimumNode(z.Right);</span>
+<span class="nc" id="L362">			isBlackOriginalY = y.Black;</span>
+<span class="nc" id="L363">			x = y.Right;</span>
+<span class="nc bnc" id="L364" title="All 2 branches missed.">			if(y.Parent == z){</span>
+<span class="nc" id="L365">				x.Parent = y;</span>
+			}else{
+<span class="nc" id="L367">				transplate(y,y.Right);</span>
+<span class="nc" id="L368">				y.Right = z.Right;</span>
+<span class="nc" id="L369">				y.Right.Parent = y;</span>
+			}
+<span class="nc" id="L371">			transplate(z,y);</span>
+<span class="nc" id="L372">			y.Left = z.Left;</span>
+<span class="nc" id="L373">			y.Black = z.Black;</span>
+		}
+
+<span class="nc bnc" id="L376" title="All 2 branches missed.">		if(isBlackOriginalY){</span>
+			//we have a problem with the black rule that needs to be fixed
+<span class="nc" id="L378">			counter = deleteFixup(x);</span>
+		}
+
+<span class="nc" id="L381">		return counter;</span>
+	}
+
+	/**
+	 * O(log(n))
+	 * fix the red and black rules after deleting a node.
+	 * @param x - the node to start the fixing from
+	 * @return number of color changes made while fixing the tree
+	 */
+	public int deleteFixup(RBNode x){
+		//number of color changes
+<span class="nc" id="L392">		int counter = 0;</span>
+		//run until x is the tree root and as long as x is black
+<span class="nc bnc" id="L394" title="All 4 branches missed.">		while(x != this.Root.Left &amp;&amp; x.Black){</span>
+<span class="nc bnc" id="L395" title="All 2 branches missed.">			if(x == x.Parent.Left){</span>
+				//x is a left child
+<span class="nc" id="L397">				RBNode w = x.Parent.Right;</span>
+<span class="nc bnc" id="L398" title="All 2 branches missed.">				if(!w.Black){</span>
+					//case 1
+<span class="nc" id="L400">					w.Black = true;</span>
+<span class="nc" id="L401">					x.Parent.Black = false;</span>
+<span class="nc" id="L402">					leftRotate(x.Parent);</span>
+<span class="nc" id="L403">					w = x.Parent.Right;</span>
+<span class="nc" id="L404">					counter += 2;</span>
+				}
+<span class="nc bnc" id="L406" title="All 4 branches missed.">				if(w.Left.Black &amp;&amp; w.Right.Black){</span>
+					//case 2
+<span class="nc" id="L408">					w.Black = false;</span>
+<span class="nc" id="L409">					x = x.Parent;</span>
+<span class="nc" id="L410">					counter += 1;</span>
+				}else 
+				{
+<span class="nc bnc" id="L413" title="All 2 branches missed.">					if(w.Right.Black){</span>
+						//case 3 
+<span class="nc" id="L415">						w.Left.Black = true;</span>
+<span class="nc" id="L416">						w.Black = false;</span>
+<span class="nc" id="L417">						rightRotate(w);</span>
+<span class="nc" id="L418">						w = x.Parent.Right;</span>
+<span class="nc" id="L419">						counter +=2;</span>
+					}
+					//case 4
+<span class="nc" id="L422">					w.Black = x.Parent.Black;</span>
+<span class="nc" id="L423">					x.Parent.Black = true;</span>
+<span class="nc" id="L424">					w.Right.Black = true;</span>
+<span class="nc" id="L425">					leftRotate(x.Parent);</span>
+<span class="nc" id="L426">					x = this.Root.Left;</span>
+<span class="nc" id="L427">					counter += 1;</span>
+				}
+<span class="nc" id="L429">			}else{</span>
+				//x is a right child
+<span class="nc" id="L431">				RBNode w = x.Parent.Left;</span>
+<span class="nc bnc" id="L432" title="All 2 branches missed.">				if(!w.Black){</span>
+					//case 1
+<span class="nc" id="L434">					w.Black = true;</span>
+<span class="nc" id="L435">					x.Parent.Black = false;</span>
+<span class="nc" id="L436">					rightRotate(x.Parent);</span>
+<span class="nc" id="L437">					w = x.Parent.Left;</span>
+<span class="nc" id="L438">					counter += 2;</span>
+				}
+<span class="nc bnc" id="L440" title="All 4 branches missed.">				if(w.Left.Black &amp;&amp; w.Right.Black){</span>
+					//case 2
+<span class="nc" id="L442">					w.Black = false;</span>
+<span class="nc" id="L443">					x = x.Parent;</span>
+<span class="nc" id="L444">					counter += 1;</span>
+				}else 
+				{
+<span class="nc bnc" id="L447" title="All 2 branches missed.">					if(w.Left.Black){</span>
+						//case 3 
+<span class="nc" id="L449">						w.Right.Black = true;</span>
+<span class="nc" id="L450">						w.Black = false;</span>
+<span class="nc" id="L451">						leftRotate(w);</span>
+<span class="nc" id="L452">						w = x.Parent.Left;</span>
+<span class="nc" id="L453">						counter +=2;</span>
+					}
+					//case 4
+<span class="nc" id="L456">					w.Black = x.Parent.Black;</span>
+<span class="nc" id="L457">					x.Parent.Black = true;</span>
+<span class="nc" id="L458">					w.Left.Black = true;</span>
+<span class="nc" id="L459">					rightRotate(x.Parent);</span>
+<span class="nc" id="L460">					x = this.Root.Left;</span>
+<span class="nc" id="L461">					counter +=1;</span>
+				}
+<span class="nc" id="L463">			}</span>
+		}
+<span class="nc bnc" id="L465" title="All 2 branches missed.">		if(x.Black == false){</span>
+<span class="nc" id="L466">			x.Black = true;</span>
+<span class="nc" id="L467">			counter += 1;</span>
+		}
+
+<span class="nc" id="L470">		return counter;</span>
+	}
+
+	/**
+	 *  O(log(n))
+	 * public String min()
+	 *
+	 * Returns the value of the item with the smallest key in the tree,
+	 * or null if the tree is empty
+	 */
+	public String min()
+	{
+<span class="nc" id="L482">		return minimumNode(this.Root.Left).Value;</span>
+	}
+
+	/**
+	 *  O(log(n))
+	 * return the node with the minimal key in the tree
+	 * @param node - the node to start looking from
+	 * @return the minimal node of the tree
+	 */
+	public static RBNode minimumNode(RBNode node){
+<span class="nc bnc" id="L492" title="All 2 branches missed.">		if(isNullNode(node)){</span>
+<span class="nc" id="L493">			return null;</span>
+		}
+
+		//next smaller node is null node so this is the minimal node
+<span class="nc bnc" id="L497" title="All 2 branches missed.">		if(isNullNode(node.Left)){</span>
+<span class="nc" id="L498">			return node;</span>
+		}
+
+<span class="nc" id="L501">		return minimumNode(node.Left);</span>
+	}
+
+	/**
+	 * O(1)
+	 * check if the given node is an infinity node
+	 * @param node - the node to check
+	 * @return true if it is an infinity node. O.W false
+	 */
+	public boolean isInfinityNode(RBNode node){
+<span class="nc bnc" id="L511" title="All 2 branches missed.">		return node.Key == Integer.MAX_VALUE;</span>
+	}
+
+	/**
+	 * O(1)
+	 * check if the given node is a null node
+	 * @param node - the node to check
+	 * @return true if it is an null node. O.W false
+	 */
+	public static boolean isNullNode(RBNode node){
+<span class="nc bnc" id="L521" title="All 2 branches missed.">		return node.Key == Integer.MIN_VALUE;</span>
+	}
+
+	/**
+	 *  O(log(n))
+	 * public String max()
+	 *
+	 * Returns the value of the item with the largest key in the tree,
+	 * or null if the tree is empty
+	 */
+	public String max()
+	{
+<span class="nc bnc" id="L533" title="All 2 branches missed.">		if(this.empty()){</span>
+<span class="nc" id="L534">			return null;</span>
+		}
+
+<span class="nc" id="L537">		return maxValue(this.Root.Left);</span>
+
+	}
+
+	/**
+	 *  O(log(n))
+	 * Returns the value of the item with the largest key in the tree,
+	 * @param node the node to start looking from
+	 * @return the value of the minimal node in the tree
+	 */
+	public static String maxValue(RBNode node){
+		//next node is null node so return this node
+<span class="nc bnc" id="L549" title="All 2 branches missed.">		if(isNullNode(node.Right)){</span>
+<span class="nc" id="L550">			return node.Value;</span>
+		}
+
+<span class="nc" id="L553">		return maxValue(node.Right);</span>
+	}
+
+	/**
+	 *  O(n)
+	 * public int[] keysToArray()
+	 *
+	 * Returns a sorted array which contains all keys in the tree,
+	 * or an empty array if the tree is empty.
+	 */
+	public int[] keysToArray()
+	{
+<span class="nc" id="L565">		String keysString = ElementsToString(this.Root,true);</span>
+		//keysString is a string of all the keys in the tree separated by &quot;,&quot;
+<span class="nc bnc" id="L567" title="All 2 branches missed.">		if(keysString.equals(&quot;&quot;)){</span>
+<span class="nc" id="L568">			return new int[0];</span>
+		}
+<span class="nc" id="L570">		return ArrayOfStringsToArrayOfInts(keysString.split(&quot;,&quot;));              </span>
+	}
+
+	/**
+	 * O(strArr length)
+	 * @param strArr - array of string values (that can be parsed into integers)
+	 * @return array of the same values cast as int
+	 */
+	public int[] ArrayOfStringsToArrayOfInts(String[] strArr){
+<span class="nc" id="L579">		int[] arr = new int[strArr.length];</span>
+<span class="nc bnc" id="L580" title="All 2 branches missed.">		for(int i=0; i&lt;= strArr.length;i++){</span>
+<span class="nc" id="L581">			arr[i] = Integer.parseInt(strArr[i]);</span>
+		}
+<span class="nc" id="L583">		return arr;</span>
+	}
+
+
+	/**
+	 * O(n)
+	 * @param node - the node we start from
+	 * @param key - if true returns the string with keys elements else return the string with value elements
+	 * @return a string with values\keys separated with ,
+	 */
+	public String ElementsToString(RBNode node,boolean key){
+<span class="nc bnc" id="L594" title="All 2 branches missed.">		if(isNullNode(node)){</span>
+<span class="nc" id="L595">			return &quot;&quot;;</span>
+		}
+
+		//if called with the infinity node recursively call with the real root
+<span class="nc bnc" id="L599" title="All 2 branches missed.">		if(isInfinityNode(node)){</span>
+<span class="nc" id="L600">			return ElementsToString(node.Left,key); </span>
+		}
+
+		String str;
+<span class="nc bnc" id="L604" title="All 2 branches missed.">		if(key){</span>
+			//str will be the key
+<span class="nc" id="L606">			str = Integer.toString(node.Key);</span>
+		}else{
+			//str will be the value
+<span class="nc" id="L609">			str = node.Value;</span>
+		}
+
+		//str is the element needs to be insert in the returning string
+<span class="nc bnc" id="L613" title="All 4 branches missed.">		if(!isNullNode(node.Left) &amp;&amp; !isNullNode(node.Right)){</span>
+			//return all the elements, bigger and smaller then the current node
+<span class="nc" id="L615">			return ElementsToString(node.Left,key) + &quot;,&quot; + str + &quot;,&quot; + ElementsToString(node.Right,key);</span>
+		}
+
+<span class="nc bnc" id="L618" title="All 2 branches missed.">		if(!isNullNode(node.Right)){</span>
+			//there is no lower elements return the current element + all the elements that bigger
+<span class="nc" id="L620">			return str + &quot;,&quot; + ElementsToString(node.Right,key);</span>
+		}
+
+<span class="nc bnc" id="L623" title="All 2 branches missed.">		if(!isNullNode(node.Left)){</span>
+			//there is no higher elements. return all the elements that are lower than the current element
+<span class="nc" id="L625">			return ElementsToString(node.Left,key) + &quot;,&quot; + str;</span>
+		}
+
+<span class="nc" id="L628">		return str;</span>
+	}
+
+	/**
+	 * O(n)
+	 * public String[] valuesToArray()
+	 *
+	 * Returns an array which contains all values in the tree,
+	 * sorted by their respective keys,
+	 * or an empty array if the tree is empty.
+	 */
+	public String[] valuesToArray()
+	{
+<span class="nc" id="L641">		String valuesString = ElementsToString(this.Root.Left,false);</span>
+		//valuesString is a string with all the values saperated with &quot;,&quot;
+<span class="nc" id="L643">		return valuesString.split(&quot;,&quot;);</span>
+	}
+	
+	/**
+	 * O(n)
+	 * print out this RBTree level by level.
+	 */
+	public void print() {
+<span class="nc" id="L651">		Queue&lt;RBNode&gt; queue = new LinkedList&lt;&gt;();   //1</span>
+<span class="nc" id="L652">		queue.add(this.Root);                       //1</span>
+<span class="nc bnc" id="L653" title="All 2 branches missed.">		while (!queue.isEmpty()) {                  //2</span>
+<span class="nc" id="L654">			int size = queue.size();            //3</span>
+<span class="nc bnc" id="L655" title="All 2 branches missed.">			for (int i = 0; i &lt; size; i++) {    //4</span>
+<span class="nc" id="L656">				RBNode curNode = queue.poll();  //5</span>
+<span class="nc bnc" id="L657" title="All 2 branches missed.">				System.out.print(curNode.Key + &quot; &quot; + curNode.Value + &quot; &quot; + (curNode.Black? &quot;black&quot; : &quot;red&quot;) + &quot; | &quot;);</span>
+<span class="nc bnc" id="L658" title="All 2 branches missed.">				if (curNode.Left != null) {</span>
+<span class="nc" id="L659">					queue.add(curNode.Left);    //6</span>
+				}
+<span class="nc bnc" id="L661" title="All 2 branches missed.">				if (curNode.Right != null) {    //7</span>
+<span class="nc" id="L662">					queue.add(curNode.Right); //8</span>
+				}
+			}
+<span class="nc" id="L665">			System.out.print('\n'); //9</span>
+<span class="nc" id="L666">		}</span>
+<span class="nc" id="L667">	}</span>
+
+	/**
+	 * O(log(n))
+	 * public int size()
+	 *
+	 * Returns the number of nodes in the tree.
+	 *
+	 * precondition: none
+	 * postcondition: none
+	 */
+	public int size()
+	{
+<span class="nc bnc" id="L680" title="All 2 branches missed.">		if(this.empty()){</span>
+<span class="nc" id="L681">			return 0;</span>
+		}
+
+<span class="nc" id="L684">		return sizeCalc(this.Root.Left);</span>
+	}
+
+	/**
+	 * O(log(n))
+	 * @param node the node to start from
+	 * @return the amount of all nodes &quot;under&quot; that node
+	 */
+	public static int sizeCalc(RBNode node){
+		//count from both sides
+<span class="nc bnc" id="L694" title="All 4 branches missed.">		if(!isNullNode(node.Left) &amp;&amp; !isNullNode(node.Right)){</span>
+<span class="nc" id="L695">			return 2 + sizeCalc(node.Left) + sizeCalc(node.Right);</span>
+		}
+
+		//count with higher side
+<span class="nc bnc" id="L699" title="All 2 branches missed.">		if(!isNullNode(node.Left)){</span>
+<span class="nc" id="L700">			return 1 + sizeCalc(node.Left);</span>
+		}
+
+		//count with lower side
+<span class="nc bnc" id="L704" title="All 2 branches missed.">		if(!isNullNode(node.Right)){</span>
+<span class="nc" id="L705">			return 1 + sizeCalc(node.Right);</span>
+		}
+
+<span class="nc" id="L708">		return 1;</span>
+	}
+
+	/**
+	 * public class RBNode
+	 *
+	 *	An implementation of a node for the RBTree.
+	 */
+	public class RBNode{
+		public String Value;
+		public int Key;
+		public RBNode Left,Right,Parent;
+		public boolean Black;
+
+		/**
+		 * O(1)
+		 * new node object
+		 * @param value - value of the node
+		 * @param key - the key of the node
+		 * @param left - the left child node
+		 * @param right - the right child node
+		 * @param parent - the parent node
+		 */
+<span class="nc" id="L731">		public RBNode(String value,int key, RBNode left, RBNode right,RBNode parent){</span>
+<span class="nc" id="L732">			this.Value = value;</span>
+<span class="nc" id="L733">			this.Key = key;</span>
+<span class="nc" id="L734">			this.Left = left;</span>
+<span class="nc" id="L735">			this.Right = right;</span>
+<span class="nc" id="L736">			this.Parent = parent;</span>
+<span class="nc" id="L737">			this.Black = false;</span>
+<span class="nc" id="L738">		}</span>
+
+		/**
+		 * O(1)
+		 * create node with null nodes children
+		 * @param value - the value for the node
+		 * @param key - the key for the node 
+		 * @param parent - the parent node
+		 */
+		public RBNode(String value,int key, RBNode parent){
+<span class="nc" id="L748">			this(value, key, null, null, parent);</span>
+<span class="nc" id="L749">			this.Left = createNullNode(this);</span>
+<span class="nc" id="L750">			this.Right = createNullNode(this);</span>
+<span class="nc" id="L751">		}</span>
+	}
+	public static void main(String[] args) {
+
+<span class="nc" id="L755">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

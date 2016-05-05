@@ -43,7 +43,7 @@ public class RBTreeWithFaults {
 	 * create infinity node with Null children
 	 * @return infinity node with no children
 	 */
-	private RBNode createInfinityNode(){
+	public RBNode createInfinityNode(){
 		return createInfinityNode(createNullNode(null));
 	}
 
@@ -53,7 +53,7 @@ public class RBTreeWithFaults {
 	 * @param leftchild - the left child of the infinity node
 	 * @return infinity node with a left child
 	 */
-	private RBNode createInfinityNode(RBNode leftchild){
+	public RBNode createInfinityNode(RBNode leftchild){
 		//create infinity node with a key of the maximum integer available in java.
 		RBNode node = new RBNode("Infinity",Integer.MAX_VALUE,leftchild,null,null);
 		//set the parent of the new child to be the node
@@ -69,7 +69,7 @@ public class RBTreeWithFaults {
 	 * @param parent - the parent of this null node
 	 * @return the null node already connected to its parent
 	 */
-	private RBNode createNullNode(RBNode parent){
+	public RBNode createNullNode(RBNode parent){
 		//create a null node. this node will have the minimum integer value available in java as a key
 		RBNode newNode = new RBNode("N",Integer.MIN_VALUE,null,null,parent);
 		//set the null node to be black (default is red)
@@ -121,7 +121,7 @@ public class RBTreeWithFaults {
 	 * the node was supposed to be found. if the parent is the infinity node and not part of the tree
 	 * returns null
 	 */
-	private RBNode SearchNode(int k,RBNode node){
+	public RBNode SearchNode(int k,RBNode node){
 		//if the node that was given is the sentinel recursively call the function with the tree root
 		if (isInfinityNode(node)){
 			return SearchNode(k,node.Left);
@@ -200,9 +200,9 @@ public class RBTreeWithFaults {
 	 * keep the red and black rules. this method will be called when the rules were been 
 	 * compromised and needs to be fix.
 	 * @param z - the node to start the fix from
-	 * @return the number of color changes that occured while fixing the tree
+	 * @return the number of color changes that occurred while fixing the tree
 	 */
-	private int fixUpTree (RBNode z){
+	public int fixUpTree (RBNode z){
 		//counter will count the number of color changes
 		int counter = 0;
 		//run until there is no problem with the red rule
@@ -251,9 +251,13 @@ public class RBTreeWithFaults {
 					}
 					//case 3: z is a right child and its uncle is red. need to left rotate
 					z.Parent.Parent.Black = false;
+                                        //!!Fault: didn’t set parent to Black
+                                        z.Parent.Black = true; 
 					leftRotate(z.Parent.Parent);
 
-					counter++;
+                                        //!!Fault: Neglected parent’s color change
+					//counter++;    
+                                        counter += 2;
 				}
 			}
 		}
@@ -272,7 +276,7 @@ public class RBTreeWithFaults {
 	 * @param x - the parent node
 	 * @param y - left child root
 	 */
-	private void leftChild(RBNode x,RBNode y){
+	public void leftChild(RBNode x,RBNode y){
 		x.Left = y;
 		y.Parent = x;
 	}
@@ -283,7 +287,7 @@ public class RBTreeWithFaults {
 	 * @param x - the parent node
 	 * @param y - the right child node
 	 */
-	private void rightChild(RBNode x,RBNode y){
+	public void rightChild(RBNode x,RBNode y){
 		x.Right = y;
 		y.Parent = x;
 	}
@@ -294,7 +298,7 @@ public class RBTreeWithFaults {
 	 * @param x - the original child
 	 * @param y - the child after the change
 	 */
-	private void transplate(RBNode x, RBNode y){
+	public void transplate(RBNode x, RBNode y){
 		if (x == x.Parent.Left){
 			leftChild(x.Parent,y);
 		}else{
@@ -308,7 +312,7 @@ public class RBTreeWithFaults {
 	 * found in Book: Cormen - introduction to algorithms
 	 * @param x - the node to rotate from
 	 */
-	private void leftRotate(RBNode x){
+	public void leftRotate(RBNode x){
 		RBNode y = x.Right;
 		transplate(x,y);
 		rightChild(x,y.Left);
@@ -321,7 +325,7 @@ public class RBTreeWithFaults {
 	 * found in Book: Cormen - introduction to algorithms
 	 * @param x - the node to rotate from
 	 */
-	private void rightRotate(RBNode y){
+	public void rightRotate(RBNode y){
 		RBNode x = y.Left;
 		transplate(y,x);
 		leftChild(y,x.Right);
@@ -371,6 +375,8 @@ public class RBTreeWithFaults {
 			transplate(z,y);
 			y.Left = z.Left;
 			y.Black = z.Black;
+                        //!!Fault: didn't set parent for y's left child
+                        y.Left.Parent = y;
 		}
 
 		if(isBlackOriginalY){
@@ -387,7 +393,7 @@ public class RBTreeWithFaults {
 	 * @param x - the node to start the fixing from
 	 * @return number of color changes made while fixing the tree
 	 */
-	private int deleteFixup(RBNode x){
+	public int deleteFixup(RBNode x){
 		//number of color changes
 		int counter = 0;
 		//run until x is the tree root and as long as x is black
@@ -479,6 +485,10 @@ public class RBTreeWithFaults {
 	 */
 	public String min()
 	{
+            //Fault: Didn’t check if tree is empty, threw nullpointerexception
+            if(this.empty()) {
+		return null;
+            }
 		return minimumNode(this.Root.Left).Value;
 	}
 
@@ -488,7 +498,7 @@ public class RBTreeWithFaults {
 	 * @param node - the node to start looking from
 	 * @return the minimal node of the tree
 	 */
-	private static RBNode minimumNode(RBNode node){
+	public static RBNode minimumNode(RBNode node){
 		if(isNullNode(node)){
 			return null;
 		}
@@ -507,7 +517,7 @@ public class RBTreeWithFaults {
 	 * @param node - the node to check
 	 * @return true if it is an infinity node. O.W false
 	 */
-	private boolean isInfinityNode(RBNode node){
+	public boolean isInfinityNode(RBNode node){
 		return node.Key == Integer.MAX_VALUE;
 	}
 
@@ -517,7 +527,7 @@ public class RBTreeWithFaults {
 	 * @param node - the node to check
 	 * @return true if it is an null node. O.W false
 	 */
-	private static boolean isNullNode(RBNode node){
+	public static boolean isNullNode(RBNode node){
 		return node.Key == Integer.MIN_VALUE;
 	}
 
@@ -575,10 +585,12 @@ public class RBTreeWithFaults {
 	 * @param strArr - array of string values (that can be parsed into integers)
 	 * @return array of the same values cast as int
 	 */
-	private int[] ArrayOfStringsToArrayOfInts(String[] strArr){
+	public int[] ArrayOfStringsToArrayOfInts(String[] strArr){
 		int[] arr = new int[strArr.length];
-		for(int i=0; i<= strArr.length;i++){
-			arr[i] = Integer.parseInt(strArr[i]);
+                //!!Fault: goes pass last index, should be <
+		//for(int i=0; i<= strArr.length;i++){
+                for(int i=0; i<strArr.length;i++){
+			arr[i] = Integer.parseInt (strArr[i]);
 		}
 		return arr;
 	}
@@ -588,9 +600,9 @@ public class RBTreeWithFaults {
 	 * O(n)
 	 * @param node - the node we start from
 	 * @param key - if true returns the string with keys elements else return the string with value elements
-	 * @return a string with values\keys seperated with ,
+	 * @return a string with values\keys separated with ,
 	 */
-	private String ElementsToString(RBNode node,boolean key){
+	public String ElementsToString(RBNode node,boolean key){
 		if(isNullNode(node)){
 			return "";
 		}
@@ -648,21 +660,21 @@ public class RBTreeWithFaults {
 	 * print out this RBTree level by level.
 	 */
 	public void print() {
-		Queue<RBNode> queue = new LinkedList<>();
-		queue.add(this.Root);
-		while (!queue.isEmpty()) {
-			int size = queue.size();
-			for (int i = 0; i < size; i++) {
-				RBNode curNode = queue.poll();
+		Queue<RBNode> queue = new LinkedList<>();  
+		queue.add(this.Root);                      
+		while (!queue.isEmpty()) {                 
+			int size = queue.size();           
+			for (int i = 0; i < size; i++) {  
+				RBNode curNode = queue.poll(); 
 				System.out.print(curNode.Key + " " + curNode.Value + " " + (curNode.Black? "black" : "red") + " | ");
 				if (curNode.Left != null) {
-					queue.add(curNode.Left);
+					queue.add(curNode.Left);   
 				}
-				if (curNode.Right != null) {
+				if (curNode.Right != null) {   
 					queue.add(curNode.Right);
 				}
 			}
-			System.out.print('\n');
+			System.out.print('\n'); 
 		}
 	}
 
@@ -692,7 +704,9 @@ public class RBTreeWithFaults {
 	public static int sizeCalc(RBNode node){
 		//count from both sides
 		if(!isNullNode(node.Left) && !isNullNode(node.Right)){
-			return 2 + sizeCalc(node.Left) + sizeCalc(node.Right);
+                        //!!Fault: should return 1 + ...
+			//return 2 + sizeCalc(node.Left) + sizeCalc(node.Right);
+                        return 1 + sizeCalc(node.Left) + sizeCalc(node.Right);
 		}
 
 		//count with higher side
@@ -714,10 +728,10 @@ public class RBTreeWithFaults {
 	 *	An implementation of a node for the RBTree.
 	 */
 	public class RBNode{
-		private String Value;
-		private int Key;
-		private RBNode Left,Right,Parent;
-		private boolean Black;
+		public String Value;
+		public int Key;
+		public RBNode Left,Right,Parent;
+		public boolean Black;
 
 		/**
 		 * O(1)
